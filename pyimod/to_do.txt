@@ -1,2 +1,0 @@
-- write non equidistant *.IDF
-- iteratable idf and iff
