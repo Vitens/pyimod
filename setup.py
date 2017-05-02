@@ -1,4 +1,4 @@
-from setuptools import setup
+from distutils.core import setup
 
 setup(name='pyimod',
       version='0.1',
@@ -7,7 +7,5 @@ setup(name='pyimod',
       author='Sjoerd Rijpkema',
       author_email='Sjoerd.Rijpkema@vitens.nl',
       packages=['pyimod'],
-      install_requires=[
-          'pyshp'
-      ],
-zip_safe=False)
+      install_requires=['pyshp'],
+      zip_safe=False)
