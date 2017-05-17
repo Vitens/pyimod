@@ -1,5 +1,4 @@
-
-class iff:
+class IFF:
     def __init__(self, iff_file):
         import re
         delimenter = r'[,\s]\s*'
