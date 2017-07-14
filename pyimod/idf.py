@@ -7,6 +7,7 @@ class IDF:
             self.idf_cont = file.read()
 
         #Read the total header of the file and from that read metadata
+        import struct
         idf_header  = struct.unpack("iiifffffffbbbbff", self.idf_cont[:52])
         self.ncol   = idf_header[1]
         self.nrow   = idf_header[2]
@@ -38,6 +39,7 @@ class IDF:
             return self.np_array
 
     def __get_matrix(self):
+        import numpy
         idf_array = [ [ 0 for i in range(0, self.ncol) ] for j in range(0, self.nrow) ]
         for i in range(0, self.nrow):
             for j in range(0, self.ncol):
@@ -131,8 +133,7 @@ class IDF:
         return None
 
 def idf_write(path, xmin, ymin, ncol, nrow, dx, dy, nodata, data, ITB=0, IVF=0, IAdit=0):
-    import struct
-    import numpy
+    import struct, numpy
 
     idf_o = open(path, mode='wb')
 
