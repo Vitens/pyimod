@@ -1,9 +1,7 @@
-#-------------------------------------------------------------------------------
-# Name:         iMOD-interpreter
-# Version:      2.0
-# Purpose:      read/write IDF-, IFF- and IPF-files
-# Author:       Sjoerd Rijpkema, Vitens
-# Created:      25-02-2015
-#-------------------------------------------------------------------------------
+from .idf import *
+from .ipf import *
+from .iff import *
 
-__all__ = ["idf", "iff", "ipf"]
+import numpy
+
+__all__ = ['iff', 'ipf', 'idf', 'plugin']

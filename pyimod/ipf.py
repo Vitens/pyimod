@@ -1,4 +1,4 @@
-class ipf:
+class IPF:
     def __init__(self, ipf_file, f_type=[]):
         #read ipf
         self.path = ipf_file

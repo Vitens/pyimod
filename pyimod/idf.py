@@ -1,47 +1,14 @@
-#-------------------------------------------------------------------------------
-# Name:         iMOD-interpreter
-# Version:      1.1
-# Purpose:      read/write IDF- en IFF-files
-# Author:       Sjoerd Rijpkema, Vitens
-# Created:      19-09-2014
-#-------------------------------------------------------------------------------
-
-class idf:
-    # Cond.               Record  Format(bytes)     Variable                                                                  Description
-    #                          1      Integer 4         1271                                                    Lahey RecordLength Ident.
-    #                          2      Integer 4         Ncol                                                            Number of columns
-    #                          3      Integer 4         Nrow                                                               Number of rows
-    #                          4        Float 4         Xmin                                                      X lower-left-coordinate
-    #                          5        Float 4         Xmax                                                     X upper-right-coordinate
-    #                          6        Float 4         Ymin                                                      Y lower-left-coordinate
-    #                          7        Float 4         Ymax                                                     Y upper-right-coordinate
-    #                          8        Float 4         Dmin                                                           Minimal data value
-    #                          9        Float 4         Dmax                                                           Maximal data value
-    #                         10        Float 4       NoData                                                                 NoData value
-    #                         11      Integer 1          IEQ                                     0: equidistant IDF 1: nonequidistant IDF
-    #                                 Integer 1          ITB             0: no usage of Top and Bot Values 1: usage of Top and Bot Values
-    #                                 Integer 1          IVF                               0: no usage of vectors 1: vectors to be stored
-    #                                 Integer 1     Not used
-    #IEQ=0                    12        Float 4           Dx                                    Column width, minimum width in case IEQ=1
-    #IEQ=0                    13        Float 4           Dy                                     Row height, minimum height in case IEQ=1
-    #ITB=1       12+abs(IEQ-1)*2        Float 4          Top                                                           Top value if ITB=1
-    #ITB=1       13+abs(IEQ-1)*2        Float 4          Bot                                                           Bot value if ITB=1
-    #IEQ=1              12+ITB*2        Float 4      Dx(Ncol)                     Column width for each column, ranging from west to east
-    #IEQ=1         13+ITB*2+Ncol        Float 4      Dy(Nrow)                        Row height for each row, ranging from north to south
-    #                       iRec        Float 4  X(Ncol,Nrow)  Value for each cell  (iRec=10 + abs(IEQ-1)*2 + IEQ*(Nrow+Ncol) + ITB*2 + 1)
-    #         iRec + (Nrow*Ncol)      Integer 1         IAdit      Binary number to store optional arguments: IP1=1: Comments added IP?=?:
-    #IP1=1   iRec +(Nrow*Ncol)+1      Integer 1         Nline                                        Number of lines that contain comments
-    #IP1=1                              Char. 4   Comm(Nline)                                                           Comment for Nlines
-
+class IDF:
     def __init__(self, idf_file):
-        import struct
-
         self.path = idf_file
+
+        #Open binary file and read total content in memory
         with open(idf_file, mode='rb') as file:
             self.idf_cont = file.read()
 
-        idf_header  = struct.unpack("iiifffffffbbbbff", self.idf_cont[: 52])
-
+        #Read the total header of the file and from that read metadata
+        import struct
+        idf_header  = struct.unpack("iiifffffffbbbbff", self.idf_cont[:52])
         self.ncol   = idf_header[1]
         self.nrow   = idf_header[2]
         self.xmin   = idf_header[3]
@@ -51,16 +18,14 @@ class idf:
         self.dmin   = idf_header[7]
         self.dmax   = idf_header[8]
         self.nodata = idf_header[9]
-
         self.ieq    = idf_header[10]
         self.itb    = idf_header[11]
         self.ivf    = idf_header[12]
-
         self.min_dx = idf_header[14]
         self.min_dy = idf_header[15]
-
         self.irec   = 4*(11 + abs(self.ieq-1)*2 + self.ieq*(self.nrow+self.ncol) + self.itb*2)
 
+        #Determine equidistant or not, depending on that read dx, dy
         if self.ieq == 1:
             self.dx = struct.unpack(self.ncol * "f", self.idf_cont[4*(11 + self.itb*2)            : 4*(11 + self.itb*2 + self.ncol)])
             self.dy = struct.unpack(self.nrow * "f", self.idf_cont[4*(11 + self.itb*2 + self.ncol): 4*(11 + self.itb*2 + self.ncol + self.nrow)])
@@ -74,7 +39,7 @@ class idf:
             return self.np_array
 
     def __get_matrix(self):
-        import numpy, struct
+        import numpy
         idf_array = [ [ 0 for i in range(0, self.ncol) ] for j in range(0, self.nrow) ]
         for i in range(0, self.nrow):
             for j in range(0, self.ncol):
@@ -82,49 +47,40 @@ class idf:
 
         self.np_array = numpy.asarray(idf_array, dtype=numpy.float32)
 
-        return None
-
     def xy2cr(self, x, y):
+        #function to convert x, y coordinate to row, col of idf
         x = float(x)
         y = float(y)
-        if (x < self.xmin) or (x > self.xmax) or (y < self.ymin) or (y > self.ymax):
+        if (x<self.xmin) or (x>self.xmax) or (y<self.ymin) or (y>self.ymax):
             print "Coordinates outside idf domain", self.xmin, self.xmax, self.ymin, self.ymax, x, y
             raise error
-
-        if self.ieq:
-            posx = self.xmin
-            for col in range(0, len(self.dx)):
-                if posx > x:
-                    break
-                posx = posx + self.dx[col]
-
-            posy = self.ymax
-            for row in range(0, len(self.dy)):
-                if posy < y:
-                    break
-                posy = posy - self.dy[row]
         else:
-            col = int((x-self.xmin)/self.dx)+1
-            row = int((self.ymax-y)/self.dy)+1
+            if self.ieq:
+                posx = self.xmin
+                for col in range(0, len(self.dx)):
+                    if posx > x:
+                        break
+                    posx = posx + self.dx[col]
+                posy = self.ymax
+                for row in range(0, len(self.dy)):
+                    if posy < y:
+                        break
+                    posy = posy - self.dy[row]
+            else:
+                col = int((x-self.xmin)/self.dx)+1
+                row = int((self.ymax-y)/self.dy)+1
+            return row, col
 
-        return col, row
-
-    def get_value(self, x, y, cor_type="cor"):
-        import struct
-        if cor_type == "cor":
-            col, row = self.xy2cr(x, y)
-        elif cor_type == "col_row":
-            if (x < 0) or (x > self.ncol) or (y < 0) or (y > self.nrow):
-                print "Coordinates outside idf domain"
-                raise error
+    def get_value(self, x, y, row_col=False):
+        #Determine the value add coordinate x, y (either in real coordinates or
+        #row, col)
+        if not row_col:
+            row, col = self.xy2cr(x, y)
+        else:
             col = x
             row = y
-        else:
-            print "Wrong argument"
-            raise error
 
         value = struct.unpack("f", self.idf_cont[self.irec+(self.ncol*(row-1)+col-1)*4: self.irec+(self.ncol*(row-1)+col)*4])[0]
-
         return value
 
     def save(self, path=None):
@@ -177,8 +133,7 @@ class idf:
         return None
 
 def idf_write(path, xmin, ymin, ncol, nrow, dx, dy, nodata, data, ITB=0, IVF=0, IAdit=0):
-    import struct
-    import numpy
+    import struct, numpy
 
     idf_o = open(path, mode='wb')
 
