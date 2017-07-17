@@ -90,15 +90,20 @@ class IDF:
         idf_write(path, self.xmin,self.ymin,self.ncol,self.nrow, self.dx, self.dy, self.nodata, self.np_array)
         return None
 
-    def save_subset(self, xmin, ymin, xmax, ymax, path):
-        colmin, rowmin = self.xy2cr(xmin, ymin)
-        colmax, rowmax = self.xy2cr(xmax, ymax)
+    def np_array_subset(self, xmin, ymin, xmax, ymax):
+        rowmin, colmin = self.xy2cr(xmin, ymin)
+        rowmax, colmax = self.xy2cr(xmax, ymax)
 
+        subset = self.np_array[rowmax:rowmin, colmin:colmax]
+
+        return subset
+
+    def save_subset(self, xmin, ymin, xmax, ymax, path):
+        subset = self.np_array_subset(xmin, ymin, xmax, ymax)
+
+        rowmin, colmin = self.xy2cr(xmin, ymin)
         xmin_cell = self.xmin + self.dx * (colmin)
         ymin_cell = self.ymax - self.dy * (rowmin)
-
-        subset = self.np_array[rowmax:rowmin,colmin:colmax]
-
         nrow, ncol = subset.shape
 
         idf_write(path, xmin_cell, ymin_cell, ncol, nrow, self.dx, self.dy, self.nodata, subset, ITB=0, IVF=0, IAdit=0)
