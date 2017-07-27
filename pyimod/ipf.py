@@ -42,6 +42,54 @@ class IPF:
                         exit
                 self.features.append(feat_t)
 
+    def __getattr__(self, name):
+        if name == 'gdf':
+            self.__get_gdf()
+            return self.gdf
+        elif name == 'df':
+            self.__get_df()
+            return self.df
+        elif name == 'geometry':
+            self.__get_geometry()
+            return self.geometry
+
+    def __get_gdf(self):
+        try:
+            import geopandas
+        except ImportError:
+            print "geopandas not installed"
+            raise ImportError
+
+        self.gdf = geopandas.GeoDataFrame(self.df, geometry=self.geometry)
+
+    def __get_df(self):
+        try:
+            import pandas
+        except ImportError:
+            print "pandas not installed"
+            raise ImportError
+
+        df = pandas.DataFrame(self.features, columns=self.fields)
+
+        xcol = df.columns[0]
+        ycol = df.columns[1]
+        df[xcol] = pandas.to_numeric(df[xcol])
+        df[ycol] = pandas.to_numeric(df[ycol])
+
+        self.df = df
+
+    def __get_geometry(self):
+        try:
+            import shapely
+        except ImportError:
+            print "shapely not installed"
+            raise ImportError
+
+        xcol = self.df.columns[0]
+        ycol = self.df.columns[1]
+        geometry=[shapely.geometry.Point(xy) for xy in zip(self.df[xcol], self.df[ycol])]
+        self.geometry = geometry
+
     def add_field(self, field_name, values):
         if len(values) <> self.num_features:
             print "Error, wrong input"
