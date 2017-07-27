@@ -35,10 +35,10 @@ class IDF:
 
     def __getattr__(self, name):
         if name == 'np_array':
-            self.__get_matrix()
+            self.__np_array()
             return self.np_array
 
-    def __get_matrix(self):
+    def __get_np_array(self):
         import numpy, struct
         idf_array = [ [ 0 for i in range(0, self.ncol) ] for j in range(0, self.nrow) ]
         for i in range(0, self.nrow):
