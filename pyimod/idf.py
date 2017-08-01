@@ -35,7 +35,7 @@ class IDF:
 
     def __getattr__(self, name):
         if name == 'np_array':
-            self.__np_array()
+            self.__get_np_array()
             return self.np_array
 
     def __get_np_array(self):
