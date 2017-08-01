@@ -72,6 +72,7 @@ class IDF:
             return row, col
 
     def get_value(self, x, y, row_col=False):
+        import struct
         #Determine the value add coordinate x, y (either in real coordinates or
         #row, col)
         if not row_col:
