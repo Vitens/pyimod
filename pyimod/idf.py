@@ -35,11 +35,11 @@ class IDF:
 
     def __getattr__(self, name):
         if name == 'np_array':
-            self.__get_matrix()
+            self.__get_np_array()
             return self.np_array
 
-    def __get_matrix(self):
-        import numpy
+    def __get_np_array(self):
+        import numpy, struct
         idf_array = [ [ 0 for i in range(0, self.ncol) ] for j in range(0, self.nrow) ]
         for i in range(0, self.nrow):
             for j in range(0, self.ncol):
@@ -72,6 +72,7 @@ class IDF:
             return row, col
 
     def get_value(self, x, y, row_col=False):
+        import struct
         #Determine the value add coordinate x, y (either in real coordinates or
         #row, col)
         if not row_col:
@@ -90,15 +91,20 @@ class IDF:
         idf_write(path, self.xmin,self.ymin,self.ncol,self.nrow, self.dx, self.dy, self.nodata, self.np_array)
         return None
 
-    def save_subset(self, xmin, ymin, xmax, ymax, path):
-        colmin, rowmin = self.xy2cr(xmin, ymin)
-        colmax, rowmax = self.xy2cr(xmax, ymax)
+    def np_array_subset(self, xmin, ymin, xmax, ymax):
+        rowmin, colmin = self.xy2cr(xmin, ymin)
+        rowmax, colmax = self.xy2cr(xmax, ymax)
 
+        subset = self.np_array[rowmax:rowmin, colmin:colmax]
+
+        return subset
+
+    def save_subset(self, xmin, ymin, xmax, ymax, path):
+        subset = self.np_array_subset(xmin, ymin, xmax, ymax)
+
+        rowmin, colmin = self.xy2cr(xmin, ymin)
         xmin_cell = self.xmin + self.dx * (colmin)
         ymin_cell = self.ymax - self.dy * (rowmin)
-
-        subset = self.np_array[rowmax:rowmin,colmin:colmax]
-
         nrow, ncol = subset.shape
 
         idf_write(path, xmin_cell, ymin_cell, ncol, nrow, self.dx, self.dy, self.nodata, subset, ITB=0, IVF=0, IAdit=0)
