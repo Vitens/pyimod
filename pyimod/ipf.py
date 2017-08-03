@@ -64,17 +64,12 @@ class IPF:
 
     def __get_df(self):
         try:
-            import pandas
+            import pandas, numpy
         except ImportError:
             print "pandas not installed"
             raise ImportError
 
-        df = pandas.DataFrame(self.features, columns=self.fields)
-
-        xcol = df.columns[0]
-        ycol = df.columns[1]
-        df[xcol] = pandas.to_numeric(df[xcol])
-        df[ycol] = pandas.to_numeric(df[ycol])
+        df = pandas.DataFrame(self.features, columns=self.fields, dtype=numpy.float64)
 
         self.df = df
 
