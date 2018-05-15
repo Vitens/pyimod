@@ -23,14 +23,14 @@ class IFF:
         self.num_fields = int(cont_iff(self.path,0)[0])
 
         self.fields = []
-        for i in xrange(1, self.num_fields):
+        for i in range(1, self.num_fields):
             self.fields.append(cont_iff(self.path,i))
 
         #get number of particles, particle numbers and corresponding lines
         self.particles = []
         begin_l = []
         end_l   = []
-        for i in xrange(self.num_fields + 1, line_max):
+        for i in range(self.num_fields + 1, line_max):
             l = cont_iff(self.path, i)
             part_num = int(l[0])
             if i == self.num_fields + 1:
@@ -59,7 +59,7 @@ class IFF:
 
     def get_path(self, part_num):
         path = []
-        for i in xrange(self.particles_line[part_num][0], self.particles_line[part_num][1]+1):
+        for i in range(self.particles_line[part_num][0], self.particles_line[part_num][1]+1):
             l    = cont_iff(self.path, i)
             x    = float(l[2])
             y    = float(l[3])
@@ -73,13 +73,13 @@ class IFF:
     def save_part(self, iff_file, out_part):
         iff_out = open(iff_file, 'w')
 
-        for i in xrange(self.num_fields+1):
+        for i in range(self.num_fields+1):
             iff_out.write(cont_iff(self.path, i)[0]+'\n')
 
         for p in out_part:
             pbl = self.particles_line[p][0]
             pel = self.particles_line[p][1]
-            for i in xrange(pbl, pel+1):
+            for i in range(pbl, pel+1):
                 for n in cont_iff(self.path, i):
                     iff_out.write(n + '  ')
                 iff_out.write('\n')
@@ -102,7 +102,7 @@ class IFF:
                     p.append(k)
                     pnt.append(p)
 
-        print pnt
+        print(pnt)
         fld = ['x', 'y', 'z', 'end_time', 'part_n']
 
         ipf.write_ipf(fld, pnt, path)
@@ -131,7 +131,7 @@ class IFF:
         for part in part_out:
             path = self.get_path(part)
             if multi:
-                for i in xrange(len(path)-1):
+                for i in range(len(path)-1):
                     pnt_b, pnt_e = path[i], path[i+1]
                     xb, yb, zb = pnt_b[0], pnt_b[1], pnt_b[2]
                     xe, ye, ze = pnt_e[0], pnt_e[1], pnt_e[2]

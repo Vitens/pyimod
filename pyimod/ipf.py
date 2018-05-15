@@ -22,7 +22,7 @@ class IPF:
 
         #get features
         import re
-        delimiter = r'[,\s]\s*'
+        delimiter = r'* *[,\s]\s*'
         self.features = []
         for i in range(3 + self.num_fields, len(self.ipf_cont)):
             feat = re.split(delimiter, self.ipf_cont[i].rstrip('\n').lstrip(' '))
@@ -38,7 +38,7 @@ class IPF:
                     elif f_type[i] == 's':
                         feat_t.append(str(j))
                     else:
-                        print "error"
+                        print("error")
                         exit
                 self.features.append(feat_t)
 
@@ -57,7 +57,7 @@ class IPF:
         try:
             import geopandas
         except ImportError:
-            print "geopandas not installed"
+            print("geopandas not installed")
             raise ImportError
 
         self.gdf = geopandas.GeoDataFrame(self.df, geometry=self.geometry)
@@ -66,7 +66,7 @@ class IPF:
         try:
             import pandas, numpy
         except ImportError:
-            print "pandas not installed"
+            print("pandas not installed")
             raise ImportError
 
         df = pandas.DataFrame(self.features, columns=self.fields, dtype=numpy.float64)
@@ -77,7 +77,7 @@ class IPF:
         try:
             import shapely
         except ImportError:
-            print "shapely not installed"
+            print("shapely not installed")
             raise ImportError
 
         xcol = self.df.columns[0]
@@ -86,8 +86,8 @@ class IPF:
         self.geometry = geometry
 
     def add_field(self, field_name, values):
-        if len(values) <> self.num_features:
-            print "Error, wrong input"
+        if len(values) != self.num_features:
+            print("Error, wrong input")
             exit
 
         self.fields.append(field_name)
@@ -156,7 +156,7 @@ def write_ipf(fields, features, path, txt_fieldnumber = 0):
         for j in i:
             j_line = str(j)
             ipf_o.write(j_line)
-            if k <> number_fields-1:
+            if k != number_fields-1:
                 ipf_o.write(r', ')
             else:
                 ipf_o.write('\n')

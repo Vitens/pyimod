@@ -52,7 +52,7 @@ class IDF:
         x = float(x)
         y = float(y)
         if (x<self.xmin) or (x>self.xmax) or (y<self.ymin) or (y>self.ymax):
-            print "Coordinates outside idf domain", self.xmin, self.xmax, self.ymin, self.ymax, x, y
+            print("Coordinates outside idf domain", self.xmin, self.xmax, self.ymin, self.ymax, x, y)
             raise error
         else:
             if self.ieq:
@@ -131,8 +131,8 @@ class IDF:
         asc.write("cellsize       " + str(self.dx)     + "\n")
         asc.write("NODATA_value   " + str(self.nodata) + "\n")
 
-        for i in xrange(self.nrow):
-            for j in xrange(self.ncol):
+        for i in range(self.nrow):
+            for j in range(self.ncol):
                 asc.write(str(self.np_array[i,j]) + "   ")
             asc.write('\n')
 
